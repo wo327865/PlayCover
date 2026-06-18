@@ -1,0 +1,67 @@
+name: Build custom DMG
+
+on:
+  workflow_dispatch:
+
+env:
+  CI: true
+  FASTLANE: 1
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          brew install carthage
+          npm install https://github.com/PlayCover/create-dmg
+
+      - name: Build Carthage frameworks
+        shell: bash
+        run: carthage update --use-xcframeworks
+
+      - name: Build PlayCover
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project PlayCover.xcodeproj \
+            -scheme PlayCover \
+            -configuration Nightly \
+            -destination "generic/platform=macOS" \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="-" \
+            DEVELOPMENT_TEAM="" \
+            FASTLANE=1
+
+      - name: Prepare app
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          app_path="$(find build/Build/Products -path "*/PlayCover.app" -type d | head -n 1)"
+          if [[ -z "$app_path" ]]; then
+            echo "PlayCover.app was not produced"
+            exit 1
+          fi
+          ditto "$app_path" output/PlayCover.app
+          codesign --force --deep --sign - output/PlayCover.app
+
+      - name: Create DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx create-dmg ./output/PlayCover.app ./output
+          mv ./output/*.dmg ./output/PlayCover_custom_${{ github.run_number }}.dmg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: PlayCover_custom_${{ github.run_number }}.dmg
+          path: output/PlayCover_custom_${{ github.run_number }}.dmg
