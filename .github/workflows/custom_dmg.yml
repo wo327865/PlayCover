@@ -2,6 +2,9 @@ name: Build custom DMG
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - develop
 
 env:
   CI: true
