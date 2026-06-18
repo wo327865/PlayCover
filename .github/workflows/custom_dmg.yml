@@ -62,8 +62,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx create-dmg ./output/PlayCover.app ./output
-          mv ./output/*.dmg ./output/PlayCover_custom_${{ github.run_number }}.dmg
+          mkdir -p dmg-root
+          ditto ./output/PlayCover.app ./dmg-root/PlayCover.app
+          ln -s /Applications ./dmg-root/Applications
+          hdiutil create \
+            -volname "PlayCover" \
+            -srcfolder ./dmg-root \
+            -ov \
+            -format UDZO \
+            ./output/PlayCover_custom_${{ github.run_number }}.dmg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
