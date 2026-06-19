@@ -158,6 +158,8 @@
 "settings.toggle.enableScrollWheel.help" = "Enable scroll wheel in keymapping";
 "settings.toggle.disableBuiltinMouse" = "Disable Built-in Mouse Support";
 "settings.toggle.disableBuiltinMouse.help" = "Disable the app’s built-in mouse support to avoid click conflicts.";
+"settings.toggle.disableBuiltinKeyboard" = "Disable Built-in Keyboard Support";
+"settings.toggle.disableBuiltinKeyboard.help" = "Hide the system keyboard from the app so it can stay in touch-control mode and use PlayCover keymapping.";
 
 "settings.tab.graphics" = "Graphics";
 "settings.picker.iosDevice" = "iOS device:";
@@ -336,4 +338,3 @@
 "alert.start.anyway" = "Start Anyway";
 "alert.version.title" = "New Version Available";
 "alert.version.text" = "A new version for %@ is available. Do you want to download it?";
-

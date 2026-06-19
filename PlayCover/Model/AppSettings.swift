@@ -47,6 +47,7 @@ struct AppSettingsData: Codable {
     var checkMicPermissionSync = false
     var limitMotionUpdateFrequency = false
     var disableBuiltinMouse = false
+    var disableBuiltinKeyboard = false
     var resizableAspectRatioType = 0
     var resizableAspectRatioWidth = 0
     var resizableAspectRatioHeight = 0
@@ -89,6 +90,7 @@ struct AppSettingsData: Codable {
         limitMotionUpdateFrequency = try container.decodeIfPresent(Bool.self,
                                                                    forKey: .limitMotionUpdateFrequency) ?? false
         disableBuiltinMouse = try container.decodeIfPresent(Bool.self, forKey: .disableBuiltinMouse) ?? false
+        disableBuiltinKeyboard = try container.decodeIfPresent(Bool.self, forKey: .disableBuiltinKeyboard) ?? false
         resizableAspectRatioType = try container.decodeIfPresent(Int.self, forKey: .resizableAspectRatioType) ?? 0
         resizableAspectRatioWidth = try container.decodeIfPresent(Int.self, forKey: .resizableAspectRatioWidth) ?? 0
         resizableAspectRatioHeight = try container.decodeIfPresent(Int.self, forKey: .resizableAspectRatioHeight) ?? 0

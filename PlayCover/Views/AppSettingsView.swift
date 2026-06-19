@@ -172,6 +172,11 @@ struct KeymappingView: View {
                     Spacer()
                 }
                 HStack {
+                    Toggle("settings.toggle.disableBuiltinKeyboard", isOn: $settings.settings.disableBuiltinKeyboard)
+                        .help("settings.toggle.disableBuiltinKeyboard.help")
+                    Spacer()
+                }
+                HStack {
                     Text(String(
                         format: NSLocalizedString("settings.slider.mouseSensitivity", comment: ""),
                         settings.settings.sensitivity))
