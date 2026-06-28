@@ -102,12 +102,13 @@ class PlayApp: BaseApp {
             } else {
                 // Clear any debug-related env vars that could affect the launched app
                 self.clearDebugAffectingEnvironment()
-                self.container.clearVolatileLaunchState()
+                let preservedLaunchState = self.container.clearVolatileLaunchState()
 
                 if settings.openWithLLDB {
                     try Shell.lldb(executable, withTerminalWindow: settings.openLLDBWithTerminal)
+                    self.container.restoreVolatileLaunchState(preservedLaunchState)
                 } else {
-                    runAppExec() // Splitting to reduce complexity
+                    runAppExec(preservedLaunchState: preservedLaunchState) // Splitting to reduce complexity
                 }
             }
             isStarting = false
@@ -152,7 +153,7 @@ extension PlayApp {
         }
     }
 
-    func runAppExec() {
+    func runAppExec(preservedLaunchState: [String: Data]) {
         let config = NSWorkspace.OpenConfiguration()
 
         // Prevent propagating debugging-related variables to child process
@@ -168,6 +169,7 @@ extension PlayApp {
             configuration: config,
             completionHandler: { runningApp, error in
                 guard error == nil else { return }
+                self.container.restoreVolatileLaunchState(preservedLaunchState)
                 // Run a thread loop in the background to handle background tasks
                 Task(priority: .background) {
                     if let runningApp = runningApp {
