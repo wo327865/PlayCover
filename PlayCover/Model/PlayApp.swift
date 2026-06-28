@@ -102,7 +102,7 @@ class PlayApp: BaseApp {
             } else {
                 // Clear any debug-related env vars that could affect the launched app
                 self.clearDebugAffectingEnvironment()
-                self.container.disableSavedApplicationState()
+                self.container.clearVolatileLaunchState()
 
                 if settings.openWithLLDB {
                     try Shell.lldb(executable, withTerminalWindow: settings.openLLDBWithTerminal)

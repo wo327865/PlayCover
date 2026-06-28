@@ -26,12 +26,13 @@ struct AppContainer {
             .appendingPathExtension("plist")
     }
 
-    var savedApplicationStateUrl: URL {
+    var cachesUrl: URL {
+        libraryUrl.appendingPathComponent("Caches")
+    }
+
+    var libraryUrl: URL {
         containerUrl.appendingPathComponent("Data")
             .appendingPathComponent("Library")
-            .appendingPathComponent("Saved Application State")
-            .appendingPathComponent("\(bundleId)~iosmac")
-            .appendingPathExtension("savedState")
     }
 
     init(bundleId: String) {
@@ -42,33 +43,29 @@ struct AppContainer {
         FileManager.default.delete(at: containerUrl)
     }
 
-    public func disableSavedApplicationState() {
-        var preferences = NSDictionary(contentsOf: userPrefsUrl) as? [String: Any] ?? [:]
+    public func clearVolatileLaunchState() {
+        guard bundleId == "com.tencent.cdnf" else { return }
 
-        let ignoresState = preferences["ApplePersistenceIgnoreState"] as? Bool == true
-        let closesWindows = preferences["NSQuitAlwaysKeepsWindows"] as? Bool == false
+        let preservedCacheFiles = Set([
+            "itop_login.txt",
+            "jwt_token.txt",
+            "web_ticket.txt"
+        ])
 
-        if !ignoresState || !closesWindows {
-            preferences["ApplePersistenceIgnoreState"] = true
-            preferences["NSQuitAlwaysKeepsWindows"] = false
+        do {
+            let cacheItems = try FileManager.default.contentsOfDirectory(
+                at: cachesUrl,
+                includingPropertiesForKeys: nil
+            )
 
-            do {
-                try FileManager.default.createDirectory(
-                    at: userPrefsUrl.deletingLastPathComponent(),
-                    withIntermediateDirectories: true
-                )
-                let data = try PropertyListSerialization.data(
-                    fromPropertyList: preferences,
-                    format: .binary,
-                    options: 0
-                )
-                try data.write(to: userPrefsUrl, options: .atomic)
-            } catch {
-                Log.shared.error(error)
+            for item in cacheItems where !preservedCacheFiles.contains(item.lastPathComponent) {
+                try FileManager.default.removeItem(at: item)
             }
+        } catch CocoaError.fileReadNoSuchFile {
+            return
+        } catch {
+            Log.shared.error(error)
         }
-
-        FileManager.default.delete(at: savedApplicationStateUrl)
     }
 
     public func doesExist() -> Bool {
